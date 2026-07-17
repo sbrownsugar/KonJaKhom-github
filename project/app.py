@@ -26,7 +26,16 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from src import scoring, recommend, mirror, dashboard, theme   # noqa: E402
-from src.pose import analyze_side, analyze_front, PoseError    # noqa: E402
+
+# *** ห้าม import src.pose ตรงนี้ ***
+# src.pose ลาก mediapipe + opencv (~400 MB) มาตั้งแต่วินาทีที่เปิดแอป ทั้งที่รูปเป็นของ
+# "ไม่บังคับ" และ β ของมุมท่าทาง = 0 (หลักฐาน null) -> คนที่ไม่ถ่ายรูปไม่ควรต้องมีไลบรารีนี้เลย
+# ผลพลอยได้: เดโมสาธารณะ (BZ_PUBLIC_DEMO=1) รันได้โดยไม่ต้องติดตั้ง mediapipe แม้แต่นิดเดียว
+# -> ซึ่งกลายเป็นหลักฐานเป็น ๆ ว่า "ลบ MediaPipe ออกแล้วดัชนีไม่เปลี่ยน" จริงตามที่เราเคลม
+# โหลดจริงที่ _step_photo() เท่านั้น (ดู _load_pose())
+
+# เดโมสาธารณะ: ปิดกล้อง ไม่บันทึกอะไร (ตั้งค่าใน Streamlit Cloud -> Settings -> Secrets/env)
+PUBLIC_DEMO = os.environ.get("BZ_PUBLIC_DEMO") == "1"
 
 _ICON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo_64.png")
 st.set_page_config(page_title="ก่อนจะค่อม", layout="wide",
@@ -39,7 +48,26 @@ ASSET_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
 
 
 # ==========================================================================
+def _demo_banner():
+    """ประกาศตัวว่าเป็นเดโมสาธารณะ — ต้องขึ้นทุกหน้า ห้ามให้ใครเข้าใจผิดแม้แต่วินาทีเดียว
+
+    เหตุผลที่ต้องมี: โครงงานนี้ประกาศว่า "ประมวลผลบนเครื่อง ไม่ส่งข้อมูลออกนอกเครื่อง"
+    เดโมนี้รันบนคลาวด์ = คนละบริบท ถ้าไม่บอก เท่ากับเราผิดคำสัญญาที่เขียนเอง
+    """
+    if not PUBLIC_DEMO:
+        return
+    st.warning(
+        "**เดโมสาธารณะ — ปิดกล้อง · ไม่บันทึกอะไรทั้งสิ้น**  \n"
+        "ระบบตัวจริงรัน**บนเครื่องของโรงเรียนแบบออฟไลน์** เพราะภาพและคำตอบของนักเรียน"
+        "ต้องไม่ออกนอกเครื่อง เดโมนี้จึง**ถอดกล้องออกทั้งหมด** (ไม่มีแม้แต่ไลบรารี MediaPipe "
+        "ติดตั้งอยู่บนเซิร์ฟเวอร์นี้) และไม่เขียนคำตอบของคุณลงที่ใดเลย — ปิดแท็บแล้วหายทันที  \n"
+        "↳ และนี่คือหลักฐานว่าคำเคลมของเราจริง: **ถอด MediaPipe ออกหมด ดัชนีความเสี่ยง"
+        "ยังทำงานครบเหมือนเดิม** เพราะน้ำหนักของมุมท่าทาง = 0 ตามที่หลักฐานสั่ง",
+        icon="🌐")
+
+
 def header():
+    _demo_banner()
     st.markdown(
         "<h1 style='margin-bottom:0'>ก่อนจะค่อม</h1>"
         "<p style='color:#666;margin-top:4px;font-size:1.05em'>"
@@ -55,15 +83,18 @@ def header():
 # ตัวช่วยของ "เครื่องมือคัดกรองส่วนบุคคล" (ทุกคนใช้เหมือนกัน — ไม่มีโหมดครู/นักเรียนแล้ว)
 # ==========================================================================
 def _step_header(step: int):
-    names = {1: "คำถาม", 2: "ถ่ายรูป (ไม่บังคับ)", 3: "ผลลัพธ์ + คำแนะนำ"}
-    cols = st.columns(3)
-    for i in (1, 2, 3):
+    # เดโมสาธารณะไม่มีขั้นถ่ายรูป -> แถบต้องเหลือ 2 ขั้น
+    # (ห้ามโชว์ขั้นที่กดไปไม่ได้ — เลขขั้นที่โชว์คือลำดับที่เห็น ไม่ใช่รหัสขั้นภายใน)
+    steps = ([(1, "คำถาม"), (3, "ผลลัพธ์ + คำแนะนำ")] if PUBLIC_DEMO else
+             [(1, "คำถาม"), (2, "ถ่ายรูป (ไม่บังคับ)"), (3, "ผลลัพธ์ + คำแนะนำ")])
+    cols = st.columns(len(steps))
+    for shown, (i, name) in enumerate(steps, start=1):
         mark = "✅" if i < step else ("🔵" if i == step else "⚪")
         weight = "700" if i == step else "400"
         color = "#0f172a" if i == step else "#94a3b8"
-        cols[i - 1].markdown(
+        cols[shown - 1].markdown(
             "<div style='font-weight:%s;color:%s'>%s ขั้น %d · %s</div>"
-            % (weight, color, mark, i, names[i]), unsafe_allow_html=True)
+            % (weight, color, mark, shown, name), unsafe_allow_html=True)
     st.divider()
 
 
@@ -142,6 +173,16 @@ def _symptom_groups(ans: dict) -> list:
 # หมายเหตุ: เคยมี _auto_capture() ที่เปิดหน้าต่าง OpenCV แยกผ่าน subprocess — ลบทิ้งแล้ว
 # เพราะเจ้าของงานต้องการ "เห็นกล้องสดในหน้าเว็บ" ไม่ใช่หน้าต่างเด้ง (ดู _live_camera_ui)
 # ส่วน scripts/auto_capture.py ยังอยู่ ใช้ที่บูธเก็บข้อมูลจริงเหมือนเดิม (เซฟลง 5-เก็บข้อมูล/ภาพดิบ)
+
+
+def _load_pose():
+    """โหลด src.pose ตอนที่จะใช้จริงเท่านั้น -> คืน (analyze_side, analyze_front, PoseError)
+
+    แยกมาเป็นฟังก์ชันเพราะ import mediapipe ใช้เวลาหลายวินาที และกินแรมเป็นร้อย MB
+    คนที่ข้ามการถ่ายรูป (ซึ่งใช้ได้เต็มระบบ เพราะมุม = น้ำหนัก 0) ไม่ต้องจ่ายราคานี้เลย
+    """
+    from src.pose import analyze_side, analyze_front, PoseError
+    return analyze_side, analyze_front, PoseError
 
 
 @st.cache_resource
@@ -363,9 +404,12 @@ def _step_questions():
                job_strain=job_strain, prior_treatment=prior_tx, **flags)
 
     st.divider()
-    if st.button("ต่อไป → ถ่ายรูป (ไม่บังคับ)", type="primary", use_container_width=True):
+    # เดโมสาธารณะไม่มีขั้นถ่ายรูป -> ข้ามไปผลลัพธ์เลย (ปุ่มต้องไม่โกหกว่าจะพาไปถ่ายรูป)
+    _next_label = "ดูผลลัพธ์ →" if PUBLIC_DEMO else "ต่อไป → ถ่ายรูป (ไม่บังคับ)"
+    if st.button(_next_label, type="primary", use_container_width=True):
         st.session_state.pans = ans
-        st.session_state.pstep = 2
+        st.session_state.pposture = None
+        st.session_state.pstep = 3 if PUBLIC_DEMO else 2
         st.rerun()
 
 
@@ -403,16 +447,27 @@ def _step_photo():
     if go_skip or go_use:
         posture = None
         if go_use:
+            # โหลด mediapipe ตอนนี้เท่านั้น (ดูเหตุผลที่ _load_pose)
+            # ถ้าเครื่องไม่มี mediapipe: บอกตรง ๆ แล้วไปต่อโดยไม่มีมุม -- ห้ามให้ทั้งหน้าพัง
+            # เพราะรูปเป็นของไม่บังคับ และดัชนีความเสี่ยงไม่ได้ใช้มุมอยู่แล้ว (beta = 0)
+            try:
+                analyze_side, analyze_front, PoseError = _load_pose()
+            except Exception as e:                       # noqa: BLE001
+                st.warning("เครื่องนี้ไม่มีไลบรารีวิเคราะห์ภาพ (%s) — "
+                           "ข้ามการวัดมุมไป ผลการคัดกรองยังครบเหมือนเดิม" % str(e)[:60])
+                analyze_side = analyze_front = None
+
             # ภาพจากกล้องอัตโนมัติมาก่อน ถ้าไม่มีค่อยใช้ไฟล์ที่อัปโหลดเอง
             src = []
-            if cap.get("side"):
-                src.append((cap["side"], analyze_side, "ด้านข้าง"))
-            elif side_img:
-                src.append((side_img.getbuffer(), analyze_side, "ด้านข้าง"))
-            if cap.get("front"):
-                src.append((cap["front"], analyze_front, "ด้านหน้า"))
-            elif front_img:
-                src.append((front_img.getbuffer(), analyze_front, "ด้านหน้า"))
+            if analyze_side is not None:
+                if cap.get("side"):
+                    src.append((cap["side"], analyze_side, "ด้านข้าง"))
+                elif side_img:
+                    src.append((side_img.getbuffer(), analyze_side, "ด้านข้าง"))
+                if cap.get("front"):
+                    src.append((cap["front"], analyze_front, "ด้านหน้า"))
+                elif front_img:
+                    src.append((front_img.getbuffer(), analyze_front, "ด้านหน้า"))
 
             if src:
                 posture = {}
@@ -602,6 +657,12 @@ def _step_results():
 
 def _recommend_pdf_button(ans, rec, groups):
     """สร้าง PDF คำแนะนำรายบุคคลให้ดาวน์โหลด (จะเติมเต็มใน Chunk ถัดไป)"""
+    # เดโมสาธารณะ: ตัวสร้าง PDF เรียก Edge headless ซึ่งเซิร์ฟเวอร์คลาวด์ไม่มี
+    # -> ไม่ต้องโชว์ปุ่มที่กดแล้วพัง แต่ต้องบอกด้วยว่าตัวจริงมีฟีเจอร์นี้ ไม่ใช่แกล้งไม่มี
+    if PUBLIC_DEMO:
+        st.caption("📄 ตัวจริงมีปุ่มดาวน์โหลดคำแนะนำเป็น PDF — "
+                   "เดโมนี้ปิดไว้เพราะเซิร์ฟเวอร์ไม่มีเบราว์เซอร์สำหรับเรนเดอร์ไฟล์")
+        return
     # ตัวสร้าง PDF อยู่ในโมดูลแยก — ถ้ายังไม่มีก็ข้ามไปเงียบ ๆ ไม่ให้แอปพัง
     try:
         from src.report import build_recommendation_pdf
@@ -621,6 +682,10 @@ def student_mode():
     """เครื่องมือคัดกรองส่วนบุคคล (3 ขั้น) — ทุกคนใช้เหมือนกัน"""
     st.session_state.setdefault("pstep", 1)
     step = st.session_state.pstep
+    # ด่านสุดท้าย: เดโมสาธารณะต้องไปไม่ถึงขั้นถ่ายรูปไม่ว่าจะมาทางไหน
+    # (session ค้างจากก่อนตั้ง flag / กดย้อนกลับ / ลิงก์เก่า) — กล้องต้องปิดหมายถึงปิดจริง
+    if PUBLIC_DEMO and step == 2:
+        step = st.session_state.pstep = 3
     _step_header(step)
     if step == 1:
         _step_questions()
