@@ -1,0 +1,13 @@
+# ห้ามรูปบุคคลจริงขึ้น repo นี้เด็ดขาด
+*.jpg
+*.jpeg
+
+.venv/
+__pycache__/
+*.pyc
+project/outputs/
+
+# ยกเว้นของที่ต้องมี
+!project/assets/logo.png
+!project/assets/logo_64.png
+!project/models/pose_landmarker_lite.task

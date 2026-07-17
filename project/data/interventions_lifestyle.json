@@ -1,0 +1,528 @@
+{
+  "schema_version": "1.0.0",
+  "updated": "2026-07-14",
+  "audience": {
+    "age_band": "15-18",
+    "criteria_set": "child_adolescent_5_17",
+    "note_th": "นักเรียน ม.ปลายทุกคนใช้เกณฑ์เด็ก-วัยรุ่น (5-17 ปี) แม้ผู้ใช้จะอายุ 18 — เป็นการตัดสินใจโดยเจตนา เพราะ 60 นาที/วัน และ 8-10 ชม. เป็นค่าที่ครอบคลุมและปลอดภัยกว่าเกณฑ์ผู้ใหญ่ ไม่ใช่เพราะไม่รู้ว่า WHO นับ 18 เป็นผู้ใหญ่"
+  },
+  "global_disclaimer_th": "ระบบนี้ไม่ใช่การวินิจฉัยทางการแพทย์ ผลที่ได้คือ 'คะแนนแนวโน้มการรายงานอาการ' จากแบบสอบถามและมุมที่วัดได้ ไม่ใช่การทำนายโรค",
+  "design_rules": {
+    "max_cards_per_session": 5,
+    "min_cards_per_session": 3,
+    "max_cards_per_category": 1,
+    "max_posture_cards": 2,
+    "min_lifestyle_cards": 2,
+    "never_surface_bmi": true,
+    "nutrition_cards_are_universal": true,
+    "nutrition_cards_must_not_depend_on_bmi_or_weight": true,
+    "or_language": "ต้องเขียนว่า 'สัมพันธ์กับ' + ใส่ช่วงความเชื่อมั่น ห้ามเขียนว่า 'เพิ่มความเสี่ยง X เท่า'"
+  },
+
+  "referral": [
+    {
+      "id": "FLAG-RED-BODY",
+      "type": "hard_override",
+      "overrides": "ALL",
+      "triggers_any": [
+        "pain_wakes_at_night",
+        "numbness_or_weakness",
+        "pain_radiating_to_arm_or_leg",
+        "fever_or_unintended_weight_loss",
+        "recent_trauma_or_accident",
+        "morning_stiffness_over_30min",
+        "bowel_or_bladder_change",
+        "visible_trunk_asymmetry_on_forward_bend",
+        "pain_over_4_to_6_weeks_or_disrupting_school"
+      ],
+      "ui_text_th": "🩺 สิ่งที่คุณตอบมามีอาการที่ควรให้ผู้ใหญ่ช่วยดู — ระบบขอไม่ให้ท่าบริหารหรือคำแนะนำใด ๆ ในรอบนี้ และขอให้ไปคุยกับ ครูที่ปรึกษา / ห้องพยาบาล / แพทย์ ก่อนนะ ไม่ใช่เรื่องน่ากลัว แต่เป็นเรื่องที่คนที่ตรวจร่างกายได้ควรเป็นคนดู",
+      "suppress_categories": ["POS", "EX", "BRK", "NUT", "SLP", "STR", "SCR", "ERG", "BAG"]
+    },
+    {
+      "id": "FLAG-RED-EATING",
+      "type": "hard_override",
+      "overrides": ["NUT", "EX", "POS"],
+      "triggers_any": [
+        "fasting_or_skipping_meals_to_control_weight",
+        "diet_pills_or_laxatives",
+        "self_induced_vomiting",
+        "high_body_shape_concern",
+        "compensatory_exercise",
+        "history_of_weight_teasing"
+      ],
+      "ui_text_th": "💙 ระบบขอไม่พูดเรื่องอาหารหรือการออกกำลังกายกับคุณในรอบนี้ — เพราะสิ่งที่คุณตอบมาเป็นสัญญาณว่าร่างกายและใจกำลังต้องการคนช่วย ไม่ใช่โปรแกรมให้ทำเพิ่ม คุยกับครูแนะแนว / ห้องพยาบาล ได้เลย หรือโทรสายด่วนสุขภาพจิต 1323 (ฟรี 24 ชม.)",
+      "rationale_cite": "AAP 2016 (Pediatrics 138:e20161649) ระบุว่าพฤติกรรมเหล่านี้คือสัญญาณเตือน ไม่ใช่เป้าหมายที่ต้องแก้ด้วยการลดน้ำหนัก",
+      "suppress_categories": ["NUT", "EX"]
+    },
+    {
+      "id": "FLAG-YELLOW-SLEEP-STRESS",
+      "type": "escalate_and_boost",
+      "triggers_all": ["sleep_hours <= 6", "stress_high OR depression_high"],
+      "effect": "จัดเป็นความเสี่ยงสูงแม้มุมสรีระปกติ + boost SLP-01, STR-01 + แสดงช่องทางครูแนะแนว",
+      "ui_text_th": "การนอนน้อยรวมกับความเครียดสูง เป็นสองอย่างที่งานวิจัยตามยาวในวัยรุ่นพบว่า 'สัมพันธ์กับอาการปวดในอีก 2-3 ปีข้างหน้า' มากกว่ามุมท่าทางเสียอีก — ถ้าอยากคุยกับใครสักคน ครูแนะแนวหรือห้องพยาบาลอยู่ตรงนั้นเสมอ",
+      "cite": [
+        {"label": "BMC Public Health 2019 (16→19 ปี): sleep problems ↔ chronic MSK pain OR 3.63 [1.69-7.82]; anxiety OR 4.19 [1.74-10.11]", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6880415/"}
+      ]
+    },
+    {
+      "id": "FLAG-ASYM-SCOLIOSIS",
+      "type": "escalate",
+      "triggers_all": ["asym_index >= threshold_high"],
+      "ui_text_th": "ระบบเห็นความไม่สมมาตรของไหล่/สะโพกในภาพ — อาจเป็นแค่การยืนหรือมุมกล้อง แต่ถ้าก้มตัวไปข้างหน้าแล้วเห็นสะบักสองข้างสูงไม่เท่ากันชัดเจน ควรให้ห้องพยาบาลตรวจคัดกรองกระดูกสันหลังคด (ไม่ใช่สิ่งที่ระบบตัดสินได้เอง)",
+      "note": "ไม่ระงับการ์ดอื่น แต่ต้องแสดงคู่กับการ์ด POS-ASYM เสมอ"
+    }
+  ],
+
+  "interventions": [
+    {
+      "id": "POS-NECK-01",
+      "category": "POS",
+      "subtype": "strength",
+      "title_th": "เก็บคาง (chin tuck) — ฝึกกล้ามเนื้อคอชั้นลึกให้ 'ทน' ขึ้น",
+      "dose_th": "ค้าง 5-10 วินาที × 10 ครั้ง, 2-3 เซต/วัน, อย่างน้อย 3-5 วัน/สัปดาห์",
+      "how_th": "นั่ง/ยืนหลังตรง เก็บคางเข้าหาคอเหมือนทำ 'คางสองชั้น' (ไม่ใช่ก้มหน้า) รู้สึกตึงหลังคอ ค้างไว้แล้วหายใจปกติ",
+      "reason_th": "กล้ามเนื้อคอชั้นลึกคือตัวที่ต้องแบกหัวไว้ทั้งวัน ยิ่งทนได้นาน ยิ่งล้าช้า — RCT ในนักเรียนมัธยมที่ปวดคอ พบว่าโปรแกรมฝึกแบบนี้ทำให้ 'ความทนทานของกล้ามเนื้อคอเพิ่มขึ้นจริง' และอาการปวดลดลง คงผลถึง 6 เดือน",
+      "ui_text_th": "🧠 เก็บคาง 10 ครั้ง × ค้าง 5 วิ — ทำระหว่างรอครูเข้าห้องก็ได้ นี่ไม่ใช่การ 'ดัดคอให้ตรง' แต่คือการทำให้กล้ามเนื้อคอทนขึ้น เพื่อที่ตอนก้มอ่านหนังสือ 2 ชม. คอจะไม่ล้าเร็วเหมือนเดิม",
+      "target": {"posture": ["forward_head"], "symptom": ["neck"], "questionnaire": []},
+      "evidence_tier": "B",
+      "cite": [
+        {"label": "Andias et al. 2018, pilot RCT ในโรงเรียน (n=43): กลุ่มออกกำลังกาย มี neck extensor endurance เพิ่มขึ้นอย่างมีนัยสำคัญ", "url": "https://pubmed.ncbi.nlm.nih.gov/29319386/"},
+        {"label": "Andias et al. 2022, RCT วัยรุ่นปวดคอเรื้อรัง (n=127): ลดปวด คงผล 6 เดือน", "url": "https://pubmed.ncbi.nlm.nih.gov/35485186/"},
+        {"label": "Cochrane 2015 (Gross A et al.): strength training กลุ่ม cervico-scapulothoracic ลดปวดได้; 'stretching alone' ไม่พบประโยชน์", "url": "https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004250.pub5/full"}
+      ]
+    },
+    {
+      "id": "POS-NECK-02",
+      "category": "POS",
+      "subtype": "strength",
+      "title_th": "เกร็งคอต้านมือ 4 ทิศ (isometric)",
+      "dose_th": "ค้าง 5 วินาที × 5-8 ครั้ง/ทิศ (หน้า-หลัง-ซ้าย-ขวา), 3 วัน/สัปดาห์",
+      "how_th": "เอามือดันหัวเบา ๆ แล้วเกร็งคอต้านไว้ 'ไม่ให้หัวขยับ' — ออกแรงพอรู้สึกตึง ไม่ต้องสุดแรง ไม่ต้องกลั้นหายใจ",
+      "reason_th": "เพิ่มความแข็งแรงโดยไม่ต้องขยับคอ (ปลอดภัยกับคนที่ตึงอยู่แล้ว) — Cochrane ระบุว่าสิ่งที่ลดปวดคอได้จริงคือการ 'ฝึกความแข็งแรง' ไม่ใช่การยืดอย่างเดียว",
+      "ui_text_th": "💪 เกร็งคอต้านมือ 4 ทิศ ทิศละ 5 ครั้ง — ทำได้ตอนนั่งบนโต๊ะเรียน ไม่มีใครรู้ด้วยซ้ำ",
+      "target": {"posture": ["forward_head"], "symptom": ["neck"], "questionnaire": []},
+      "evidence_tier": "B",
+      "cite": [
+        {"label": "Cochrane 2015 — Exercises for mechanical neck disorders", "url": "https://pubmed.ncbi.nlm.nih.gov/25629215/"}
+      ]
+    },
+    {
+      "id": "POS-SHLD-01",
+      "category": "POS",
+      "subtype": "strength",
+      "title_th": "ดึงสะบัก Y-T-W / โรว์ยางยืด (แก้ไหล่ห่อ)",
+      "dose_th": "10-12 ครั้ง × 2-3 เซต, 3 วัน/สัปดาห์",
+      "how_th": "นอนคว่ำหรือยืนพิงกำแพง กางแขนเป็นตัว Y / T / W แล้วบีบสะบักเข้าหากันช้า ๆ ค้าง 2 วินาที (หรือใช้ยางยืดดึงเข้าหาตัว ศอกชิดลำตัว)",
+      "reason_th": "ไหล่ห่อเกิดจากกล้ามเนื้อกลางหลังทำงานน้อยกว่ากล้ามเนื้อหน้าอก — RCT 8 เดือนในวัยรุ่น (ทำในคาบพลศึกษา n=130) พบว่าโปรแกรมออกแรงต้าน + ยืด ทำให้มุมคอยื่นและไหล่ห่อ 'ดีขึ้นได้จริง' แปลว่าตัวเลขที่ระบบวัดได้ไม่ใช่สิ่งที่ติดตัวไปตลอด",
+      "ui_text_th": "🎯 บีบสะบัก 12 ครั้ง × 3 เซต, 3 วัน/สัปดาห์ — งานวิจัยทำในเด็กมัธยมในคาบพละ 8 เดือน แล้วมุมไหล่ห่อดีขึ้นจริง ตัวเลขที่คุณเห็นวันนี้ 'ขยับได้'",
+      "target": {"posture": ["rounded_shoulders", "forward_head"], "symptom": ["shoulder", "upper_back"], "questionnaire": []},
+      "evidence_tier": "B",
+      "cite": [
+        {"label": "RCT 8 เดือนในวัยรุ่น (n=130): resistance + stretching ลด forward head / protracted shoulder posture", "url": "https://pubmed.ncbi.nlm.nih.gov/27842938/"}
+      ]
+    },
+    {
+      "id": "POS-SHLD-02",
+      "category": "POS",
+      "subtype": "mobility",
+      "title_th": "ยืดอกที่ประตู + เปิดอกบนพนักเก้าอี้",
+      "dose_th": "ค้าง 30 วินาที × 2-3 ครั้ง/วัน — ใช้ 'คู่กับ' การฝึกแรง ไม่ใช่แทนที่",
+      "how_th": "วางแขนบนวงกบประตู ศอกงอ 90° ก้าวขาไปหน้า 1 ก้าว รู้สึกตึงหน้าอก / หรือเอนหลังส่วนบนพาดพนักเก้าอี้แล้วแอ่นอกขึ้น",
+      "reason_th": "การยืดช่วยให้รู้สึกโล่ง แต่ Cochrane ระบุตรง ๆ ว่า 'ยืดอย่างเดียวไม่พบประโยชน์' — มันคือของแถม ไม่ใช่ยาหลัก ยาหลักคือการฝึกกล้ามเนื้อให้แข็งแรงและทนขึ้น",
+      "ui_text_th": "🚪 ยืดอกที่ประตู 30 วิ × 3 — บอกตรง ๆ ว่านี่คือ 'ของแถม' งานวิจัยบอกว่าถ้ายืดอย่างเดียวไม่ได้ผล ต้องคู่กับการบีบสะบักด้วย",
+      "target": {"posture": ["rounded_shoulders"], "symptom": ["shoulder", "upper_back"], "questionnaire": []},
+      "evidence_tier": "C",
+      "requires_pairing_with": ["POS-SHLD-01"],
+      "cite": [
+        {"label": "Cochrane 2015: 'when stretching was used alone, no benefit was found'", "url": "https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD004250.pub5/full"}
+      ]
+    },
+    {
+      "id": "POS-CORE-01",
+      "category": "POS",
+      "subtype": "strength",
+      "title_th": "แกนกลางลำตัว: แพลงก์ + ไซด์แพลงก์ + เบิร์ดด็อก",
+      "dose_th": "แพลงก์ 20-30 วินาที × 3 | ไซด์แพลงก์ ข้างละ 15-20 วินาที × 2 (ต้องเท่ากันทั้งสองข้าง) | เบิร์ดด็อก 8-10 ครั้ง/ข้าง — 3 วัน/สัปดาห์",
+      "reason_th": "กล้ามเนื้อแกนกลางคือ 'เสื้อเกราะ' ของกระดูกสันหลัง และในเด็ก-วัยรุ่นที่ปวดหลัง งานทบทวนพบว่าการรักษาแบบขยับตัว (active) ได้ผลดีกว่าการนอนพัก (passive) อย่างชัดเจน",
+      "ui_text_th": "🛡️ แพลงก์ 30 วิ × 3 + ไซด์แพลงก์ทั้งสองข้างเท่ากัน — แกนกลางแข็งแรง = หลังไม่ต้องรับงานคนเดียว",
+      "target": {"posture": ["asymmetry", "rounded_shoulders"], "symptom": ["low_back"], "questionnaire": ["low_strength_days"]},
+      "evidence_tier": "B",
+      "cite": [
+        {"label": "Ambrosio et al. 2023 — active treatment > passive ในเด็ก/วัยรุ่นที่ปวดหลัง", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10492481/"},
+        {"label": "WHO 2020 — muscle & bone strengthening ≥3 วัน/สัปดาห์ (5-17 ปี)", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/"}
+      ]
+    },
+    {
+      "id": "POS-ASYM-01",
+      "category": "POS",
+      "subtype": "habit",
+      "title_th": "เลิกลงน้ำหนักข้างเดียว — สลับข้าง และฝึกให้สองข้างเท่ากัน",
+      "dose_th": "ทุกครั้งที่หิ้ว/สะพาย/เท้าแขน: สลับข้าง | ฝึกไซด์แพลงก์และโรว์ 'จำนวนครั้งเท่ากันทั้งสองข้าง' 3 วัน/สัปดาห์",
+      "reason_th": "ความไม่สมมาตรที่ระบบเห็นในภาพ ส่วนใหญ่มาจากนิสัย (สะพายข้างเดียว เท้าแขนข้างเดียว นั่งบิดตัวหันหาเพื่อน) มากกว่าจากโครงสร้าง — และมันคือสิ่งที่แก้ได้ด้วยการรู้ตัว",
+      "ui_text_th": "⚖️ สะพายกระเป๋าสองบ่า + สลับข้างที่หิ้วของ + เวลาฝึกให้ทำสองข้างเท่ากัน — ความเอียงที่ระบบเห็น ส่วนใหญ่คือ 'นิสัย' ไม่ใช่ 'โครงสร้าง'",
+      "target": {"posture": ["asymmetry"], "symptom": [], "questionnaire": ["one_strap_bag"]},
+      "evidence_tier": "D",
+      "must_show_with": ["FLAG-ASYM-SCOLIOSIS"],
+      "cite": [
+        {"label": "Perrone et al. 2018 — การสะพายสายเดียวสัมพันธ์กับสมรรถภาพการหายใจที่ลดลงและท่าทางที่เปลี่ยนไป", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6267109/"}
+      ]
+    },
+
+    {
+      "id": "EX-01",
+      "category": "EX",
+      "subtype": "aerobic",
+      "title_th": "ขยับระดับปานกลาง-หนัก เฉลี่ยวันละ 60 นาที",
+      "dose_th": "เฉลี่ย ≥60 นาที/วัน ตลอดสัปดาห์ (สะสมได้ ไม่ต้องรวดเดียว ไม่ต้องครบทุกวัน แต่ต้องเฉลี่ยได้)",
+      "reason_th": "นี่คือเกณฑ์ของวัยรุ่น (5-17 ปี) ไม่ใช่ 30 นาทีแบบผู้ใหญ่ — และในวัยรุ่นเอง งานตามยาว (Young-HUNT) พบว่ากิจกรรมทางกายเป็น 'ปัจจัยป้องกัน' ปวดคอ-ไหล่ ส่วนหลักฐานล่าสุดในผู้ใหญ่พบว่ากิจกรรมทางกายไม่เพียงพอสัมพันธ์กับการเกิดปวดคอใหม่ (OR 2.41; CI 1.03-5.65 — ช่วงกว้าง ยังไม่แน่นอนสูง)",
+      "ui_text_th": "🏃 ขยับให้ได้เฉลี่ยวันละ 60 นาที — ไม่ต้องเข้ายิม เดินเร็วไป-กลับโรงเรียน 20 นาที + เตะบอล/เต้น/ปั่นจักรยานตอนเย็น 40 นาที ก็ครบแล้ว\n(⚠️ 60 นาทีคือเกณฑ์ของคนอายุ 5-17 ปี — ที่เห็นในเน็ตว่า 30 นาที นั่นของผู้ใหญ่)",
+      "target": {"posture": [], "symptom": ["neck", "shoulder", "low_back"], "questionnaire": ["mvpa_below_target"]},
+      "evidence_tier": "A",
+      "cite": [
+        {"label": "WHO 2020 Guidelines (Bull FC et al., BJSM): 'at least an average of 60 min/day of moderate-to-vigorous... across the week' (5-17 ปี, strong recommendation)", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/"},
+        {"label": "Young-HUNT (J Adolesc Health 2014): physical activity เป็นปัจจัยป้องกันปวดคอ-ไหล่ในวัยรุ่น", "url": "https://pubmed.ncbi.nlm.nih.gov/24746679/"},
+        {"label": "Correia et al., Braz J Phys Ther 2025 (ผู้ใหญ่ 18-65 ปี, n=457): กิจกรรมทางกายไม่เพียงพอ OR 2.41 [1.03-5.65]", "url": "https://pubmed.ncbi.nlm.nih.gov/40845624/"}
+      ],
+      "honesty_note_th": "หลักฐานว่าออกกำลังกาย 'ป้องกัน' อาการในเด็กยังไม่หนักแน่นเท่าหลักฐานว่ามัน 'ช่วยลดอาการที่มีอยู่' — เราแนะนำตามเกณฑ์สุขภาพสากล ไม่ได้เคลมว่าป้องกันได้แน่นอน"
+    },
+    {
+      "id": "EX-02",
+      "category": "EX",
+      "subtype": "strength_bone",
+      "title_th": "กิจกรรมสร้างกล้ามเนื้อ + กระดูก อย่างน้อย 3 วัน/สัปดาห์",
+      "dose_th": "≥3 วัน/สัปดาห์ (ผู้ใหญ่คือ 2 วัน และไม่มีส่วนกระดูก — ของวัยรุ่นคือ 3 วันและต้องมีแรงกระแทกลงกระดูกด้วย)",
+      "how_th": "กระโดดเชือก บาสเกตบอล วิ่ง กระโดดตบ วิดพื้น สควอท แพลงก์ ยางยืด",
+      "reason_th": "ช่วงวัยรุ่นคือช่วงที่ร่างกายสร้าง 40-60% ของมวลกระดูกทั้งชีวิต — กิจกรรมที่ลงน้ำหนัก/มีแรงกระแทกกระตุ้นการสะสมมวลกระดูกโดยตรง นี่คือ 'หน้าต่าง' ที่ปิดแล้วปิดเลยหลังอายุประมาณ 20",
+      "ui_text_th": "🦴 กระโดดเชือก/บาส/วิดพื้น 3 วัน/สัปดาห์ — ช่วงนี้ร่างกายคุณกำลังสร้าง 40-60% ของมวลกระดูกทั้งชีวิต คิดซะว่าเป็นการฝากเงินเข้าบัญชีที่ถอนไม่ได้อีกแล้วหลังอายุ 20",
+      "target": {"posture": [], "symptom": [], "questionnaire": ["strength_days_below_3"]},
+      "evidence_tier": "A",
+      "cite": [
+        {"label": "WHO 2020 (5-17 ปี): vigorous + muscle/bone strengthening ≥3 วัน/สัปดาห์", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7719906/"},
+        {"label": "Peak bone mass — 40-60% ของมวลกระดูกสะสมในช่วงวัยรุ่น", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12088333/"}
+      ]
+    },
+
+    {
+      "id": "BRK-01",
+      "category": "BRK",
+      "subtype": "active_break",
+      "title_th": "ลุกขยับทุก 30 นาทีที่นั่ง ครั้งละ 1-3 นาที",
+      "dose_th": "ทุก 30 นาทีของการนั่ง — ลุกยืน เดิน ยืดหลัง-สะโพก-คอ 1-3 นาที (ค่านี้ใช้ค่าเดียวทั้งระบบ)",
+      "reason_th": "กล้ามเนื้อมัดเล็กที่พยุงคอ-บ่าจะทำงานค้างโดยไม่มีช่วงพักเลยเมื่อนั่งนาน การลุกคือการ 'ให้มันได้พัก' — RCT ในเด็กนักเรียนที่ให้ลุกทำ active break พร้อมท่ายืดหลัง-สะโพกทุก 30 นาที ลดอาการปวดหลังส่วนล่างได้ และไม่ทำให้สมาธิ/ผลการเรียนแย่ลง",
+      "ui_text_th": "⏱️ ตั้งเตือนทุก 30 นาที ลุกขยับ 1-3 นาที — แค่ลุกไปเติมน้ำ + ยืดตัว ไม่ต้องออกกำลังกาย นี่คือคำแนะนำที่ 'ทำง่ายที่สุดแต่ได้ผลจริงที่สุด' ในลิสต์นี้",
+      "target": {"posture": ["forward_head", "rounded_shoulders", "asymmetry"], "symptom": ["neck", "shoulder", "low_back"], "questionnaire": ["sitting_bout_over_30min"]},
+      "evidence_tier": "B",
+      "cite": [
+        {"label": "Borràs PA & Vidal-Conti J, RCT ในเด็กนักเรียน (BMC Musculoskelet Disord 2024): active break ทุก 30 นาทีของการนั่ง ลด nonspecific low back pain", "url": "https://link.springer.com/article/10.1186/s12891-024-08186-3"},
+        {"label": "Radwan et al. 2022, systematic review — active micro-breaks ลด MSK discomfort โดยไม่ลดประสิทธิภาพงาน", "url": "https://www.tandfonline.com/doi/full/10.1080/23311916.2022.2026206"}
+      ]
+    },
+    {
+      "id": "BRK-02",
+      "category": "BRK",
+      "subtype": "postural_variation",
+      "title_th": "เปลี่ยนท่าบ่อย ๆ — 'ท่าที่ดีที่สุดคือท่าถัดไป'",
+      "dose_th": "อย่าค้างท่าเดิมเกิน ~30 นาที ไม่ว่าจะเป็นท่าที่ 'ถูก' แค่ไหน",
+      "reason_th": "หลักฐานตามยาวไม่พบว่ามุมก้มคอเป็นสาเหตุของปวดคอ — สิ่งที่งานวิจัยชี้ว่าสำคัญกว่าคือ 'ระยะเวลาสะสมในท่าเดิม' และ 'ความหลากหลายของท่า' นั่งตรงเป๊ะ 3 ชั่วโมงไม่ขยับ ก็ไม่ได้ดีกว่ากันมาก",
+      "ui_text_th": "🔄 ไม่มีท่านั่งวิเศษ — 'ท่าที่ดีที่สุดคือท่าถัดไป' เปลี่ยนท่าบ่อย ๆ สำคัญกว่านั่งตรงเป๊ะแล้วค้าง 3 ชั่วโมง",
+      "target": {"posture": ["forward_head", "rounded_shoulders"], "symptom": ["neck", "shoulder"], "questionnaire": ["sitting_bout_over_30min"]},
+      "evidence_tier": "B",
+      "cite": [
+        {"label": "Correia et al. 2025 (n=457, ตาม 12 เดือน): มุมก้มคอขณะใช้มือถือ ไม่เป็นปัจจัยเสี่ยงปวดคอ (ยืน OR 1.01 [0.97-1.04]; นั่ง OR 1.01 [0.98-1.04])", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12398242/"},
+        {"label": "Field study: postural variation คือสิ่งที่ควรส่งเสริม", "url": "https://www.sciencedirect.com/science/article/abs/pii/S000368702030137X"}
+      ]
+    },
+    {
+      "id": "BRK-03",
+      "category": "BRK",
+      "subtype": "eye",
+      "title_th": "พักสายตา 20-20-20 (เรื่องตา ไม่ใช่เรื่องคอ)",
+      "dose_th": "ทุก 20 นาที มองไกล ~6 เมตร นาน 20 วินาที",
+      "reason_th": "ช่วยความสบายตาจากการจ้องจอ — แต่ต้องพูดตรง ๆ ว่า RCT ปี 2023 ไม่พบว่าการพักแบบนี้ทำให้อาการล้าตาดีขึ้นอย่างมีนัยสำคัญ (p=0.70) และมันไม่ใช่มาตรการสำหรับกล้ามเนื้อคอ ถ้าอยากช่วยคอ ต้อง 'ลุก' ไม่ใช่แค่ 'มองไกล'",
+      "ui_text_th": "👀 20-20-20: ทุก 20 นาที มองไกล 20 วินาที — ทำได้ ไม่มีโทษ แต่บอกตรง ๆ ว่าหลักฐานยังอ่อน และมันช่วยแค่ 'ตา' ไม่ได้ช่วย 'คอ' — คอต้องลุกเท่านั้น",
+      "target": {"posture": [], "symptom": ["eye_strain", "headache"], "questionnaire": ["screen_high"]},
+      "evidence_tier": "D",
+      "cite": [
+        {"label": "Johnson S et al., Optom Vis Sci 2023 — '20-20-20 Rule: Are These Numbers Justified?' (n=30): การพักไม่มีผลต่ออาการ p=0.70", "url": "https://onlinelibrary.wiley.com/doi/10.1097/OPX.0000000000001971"}
+      ]
+    },
+
+    {
+      "id": "SCR-01",
+      "category": "SCR",
+      "subtype": "dose",
+      "title_th": "จอเพื่อความบันเทิง ≤2 ชั่วโมง/วัน (ไม่รวมเรียน)",
+      "dose_th": "≤2 ชม./วัน สำหรับ recreational screen time",
+      "reason_th": "ในเด็ก-วัยรุ่น 8-19 ปี การใช้มือถือนานสัมพันธ์กับการรายงานปวดคอ (OR 1.36; CI 1.001-1.85 — ขอบล่างเกือบแตะ 1 = ยังไม่แน่นอนสูง) และในระดับประชากร ทุก 1 ชม./วันของเวลาหน้าจอที่มากขึ้น สัมพันธ์กับโอกาสปวดหลังส่วนล่างที่สูงขึ้นราว 26%",
+      "ui_text_th": "📱 จอเพื่อความบันเทิง ≤2 ชม./วัน (เรียนไม่นับ) — ไม่ต้องเลิกเล่น แค่ลด 1 ชั่วโมง แล้วเอาเวลานั้นไปนอนหรือขยับ ก็ได้ทั้งขึ้นทั้งล่อง",
+      "target": {"posture": [], "symptom": ["neck", "low_back"], "questionnaire": ["screen_over_2h"]},
+      "evidence_tier": "C",
+      "cite": [
+        {"label": "CSEP Canadian 24-Hour Movement Guidelines (5-17 ปี): recreational screen time ≤2 ชม./วัน", "url": "https://csepguidelines.ca/guidelines/children-youth/"},
+        {"label": "Mahdavi SB et al., Health Promot Perspect 2022 (15 studies, n=15,512, อายุ 8-19): มือถือ ↔ ปวดคอ OR 1.36 [1.001-1.85]", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9808908/"},
+        {"label": "Dose-response meta-analysis (n=57,831): +1 ชม./วัน ↔ โอกาสปวดหลังส่วนล่างสูงขึ้น ~26%", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10613558/"}
+      ],
+      "honesty_note_th": "⚠️ ตัวเลข ≤2 ชม. เป็นของ CSEP (แคนาดา) ไม่ใช่ของ WHO — WHO ระบุชัดว่าหลักฐานยังไม่พอกำหนดเพดานเป็นตัวเลข ห้ามเขียนว่า 'WHO แนะนำ ≤2 ชม.'"
+    },
+    {
+      "id": "SCR-02",
+      "category": "SCR",
+      "subtype": "posture_habit",
+      "title_th": "ห้ามเล่นมือถือท่านอนคว่ำ/นอนหงาย",
+      "dose_th": "เล่นมือถือในท่านั่งเสมอ — ถ้าจะดูยาว ให้พิงพนัก + วางมือถือบนขาตั้ง/กองหนังสือ",
+      "reason_th": "งานวิจัยในเด็กไทย (นครศรีธรรมราช n=233) พบว่าการใช้มือถือท่านอนคว่ำสัมพันธ์กับอาการปวดคออย่างชัดเจน (aOR 7.37; CI 2.68-20.31) และท่านอนหงาย (aOR 5.68; CI 2.55-12.67) เทียบกับท่านั่ง — ขนาดผลใหญ่กว่าเรื่องมุมองศาที่ระบบวัดได้เสียอีก",
+      "ui_text_th": "🛏️ เลิกเล่นมือถือตอนนอนคว่ำ/นอนหงาย — งานวิจัยในเด็กไทยเอง พบว่าท่านอนคว่ำสัมพันธ์กับปวดคอสูงกว่าท่านั่งหลายเท่า (aOR 7.37) นี่คือข้อที่ 'เปลี่ยนง่ายและได้ผลเยอะ' ที่สุด",
+      "target": {"posture": ["forward_head"], "symptom": ["neck"], "questionnaire": ["phone_lying_down"]},
+      "evidence_tier": "C",
+      "cite": [
+        {"label": "Mongkonkansai J et al., IJERPH 2022;19(17):10530 (นครศรีธรรมราช, n=233)", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9518098/"}
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "category": "SCR",
+      "subtype": "ergonomic",
+      "title_th": "ยกมือถือขึ้นใกล้ระดับสายตา — แต่ต้อง 'รองแขน' ด้วย",
+      "dose_th": "ทุกครั้งที่ใช้มือถือนานเกิน ~5 นาที: เท้าข้อศอกบนโต๊ะ/ตัก หรือใช้มืออีกข้างหนุนข้อศอก",
+      "reason_th": "ยกจอสูงอย่างเดียวโดยไม่รองแขน = คอสบายแต่ไปเพิ่มภาระที่ไหล่/แขนแทน (มี trade-off ชัดในงานวิจัย) การรองแขนช่วยลดภาระกล้ามเนื้อคอ-ไหล่และความล้าได้จริง",
+      "ui_text_th": "🤳 ยกมือถือขึ้นมา + เท้าข้อศอกไว้ด้วย — ยกอย่างเดียวไม่พอ ไม่งั้นคอสบายแต่ไหล่ล้าแทน",
+      "target": {"posture": ["forward_head"], "symptom": ["neck", "shoulder"], "questionnaire": ["screen_over_2h"]},
+      "evidence_tier": "C",
+      "cite": [
+        {"label": "The effects of shoulder posture on neck and shoulder musculoskeletal loading during smartphone usage (Int J Ind Ergon 2021)", "url": "https://www.sciencedirect.com/science/article/abs/pii/S0169814121000937"},
+        {"label": "Arm support ลดภาระกล้ามเนื้อคอ-ไหล่ (Appl Ergon 2021)", "url": "https://www.sciencedirect.com/science/article/abs/pii/S0003687021001058"}
+      ]
+    },
+    {
+      "id": "SCR-04",
+      "category": "SCR",
+      "subtype": "environment",
+      "title_th": "ตั้งเขต/เวลาปลอดจอ (บนเตียง, โต๊ะอาหาร)",
+      "dose_th": "อย่างน้อย 2 เขต: 'ไม่เอามือถือขึ้นเตียง' + 'ไม่เอามือถือมาโต๊ะอาหาร'",
+      "reason_th": "งานวิจัยในเด็กไทยพบว่าบ้านที่ไม่มีกติกาจำกัดการใช้มือถือ สัมพันธ์กับอาการปวดคอสูงกว่าอย่างชัดเจน (aOR 7.39) — กติกาง่าย ๆ ที่ตกลงกันในบ้านมีผลจริง ไม่ใช่แค่ 'มีวินัย'",
+      "ui_text_th": "🚫📱 กติกา 2 ข้อ: มือถือไม่ขึ้นเตียง / มือถือไม่มาโต๊ะกินข้าว — ชวนที่บ้านตกลงพร้อมกัน จะง่ายกว่าฝืนใจคนเดียว",
+      "target": {"posture": [], "symptom": ["neck"], "questionnaire": ["screen_over_2h", "no_home_screen_rules", "phone_in_bedroom"]},
+      "evidence_tier": "C",
+      "cite": [
+        {"label": "Mongkonkansai 2022: บ้านไม่มีกติกาจำกัดการใช้ aOR 7.39 [3.51-15.59]", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9518098/"},
+        {"label": "AAP Family Media Plan — screen-free times & zones", "url": "https://www.aap.org/en/patient-care/media-and-children/center-of-excellence-on-social-media-and-youth-mental-health/qa-portal/qa-portal-library/qa-portal-library-questions/screen-time-guidelines/"}
+      ]
+    },
+
+    {
+      "id": "ERG-01",
+      "category": "ERG",
+      "subtype": "workstation",
+      "title_th": "จัดจอ/โต๊ะอ่านหนังสือ: ขอบบนจอระดับสายตา ห่าง 50-70 ซม.",
+      "dose_th": "ขอบบนจออยู่ระดับสายตาหรือต่ำกว่าเล็กน้อย | ระยะห่าง ~50-70 ซม. (ประมาณหนึ่งช่วงแขน) | จออยู่ตรงหน้า ไม่ต้องบิดคอ | เท้าแตะพื้น พิงพนัก",
+      "reason_th": "ให้คออยู่ในท่าเป็นกลางแทนการก้มค้าง — ไม่ใช่เพราะองศาคือสาเหตุของอาการ แต่เพราะมันลด 'ระยะเวลาสะสม' ที่กล้ามเนื้อคอต้องออกแรงต้านน้ำหนักหัว",
+      "ui_text_th": "🖥️ ขอบบนจอ = ระดับตา, ห่างประมาณหนึ่งช่วงแขน, จอตรงหน้าไม่บิดคอ — ถ้าเป็นหนังสือ ให้เอียงขึ้นด้วยแท่นวางหรือกองหนังสือ",
+      "target": {"posture": ["forward_head"], "symptom": ["neck", "shoulder", "eye_strain"], "questionnaire": ["study_hours_high"]},
+      "evidence_tier": "C",
+      "cite": [
+        {"label": "OSHA — Computer Workstations: Monitors", "url": "https://www.osha.gov/etools/computer-workstations/components/monitors"},
+        {"label": "CCOHS — Positioning the Monitor", "url": "https://www.ccohs.ca/oshanswers/ergonomics/office/monitor_positioning.html"}
+      ]
+    },
+    {
+      "id": "ERG-02",
+      "category": "ERG",
+      "subtype": "workstation",
+      "title_th": "โน้ตบุ๊ก: ยกจอขึ้น + ต่อคีย์บอร์ด/เมาส์แยก",
+      "dose_th": "ถ้าใช้โน้ตบุ๊กนานเกิน ~1 ชม./ครั้ง",
+      "reason_th": "โน้ตบุ๊กออกแบบมาให้ทำได้ดีอย่างใดอย่างหนึ่ง — 'ดูจอ' หรือ 'พิมพ์' ไม่ใช่ทั้งคู่ ถ้าวางบนโต๊ะเฉย ๆ คุณจะก้มคอตลอดเวลาโดยไม่มีทางเลือก",
+      "ui_text_th": "💻 ยกโน้ตบุ๊กขึ้นบนกองหนังสือ + ต่อคีย์บอร์ดแยก — ไม่ต้องซื้อของแพง กองหนังสือ 3 เล่มก็ใช้ได้",
+      "target": {"posture": ["forward_head"], "symptom": ["neck"], "questionnaire": ["laptop_use_high"]},
+      "evidence_tier": "C",
+      "cite": [
+        {"label": "Mayo Clinic — Office ergonomics", "url": "https://www.mayoclinic.org/healthy-lifestyle/adult-health/in-depth/office-ergonomics/art-20046169"}
+      ]
+    },
+
+    {
+      "id": "BAG-01",
+      "category": "BAG",
+      "subtype": "load",
+      "title_th": "กระเป๋านักเรียนไม่เกิน 10% ของน้ำหนักตัว + สะพายสองสาย",
+      "dose_th": "≤10% ของน้ำหนักตัว | สองสายเสมอ | ตัวกระเป๋าอยู่สูงชิดหลังส่วนบน (ไม่ห้อยต่ำถึงก้น)",
+      "reason_th": "งานทบทวนพบว่า 'ที่ระดับ 10% ของน้ำหนักตัว มุมศีรษะ-คอเริ่มเปลี่ยนแล้ว' และที่ 15% มุมท่าทางเปลี่ยนทุกจุดรวมถึงหัวยื่น — ในความเป็นจริง นักเรียนชาย 80.9% และหญิง 85.7% แบกเกิน 10% อยู่แล้ว",
+      "ui_text_th": "🎒 กระเป๋าไม่ควรเกิน {{max_bag_kg}} กก. — สะพายสองบ่า และดันตัวกระเป๋าให้อยู่สูงชิดหลัง อย่าให้ห้อยลงไปถึงก้น",
+      "personalization": {
+        "compute": "max_bag_kg = round(body_weight_kg * 0.10, 1)",
+        "display_rule": "แสดงเฉพาะ 'น้ำหนักกระเป๋าสูงสุดเป็น กก.' ห้ามแสดงน้ำหนักตัวของนักเรียนซ้ำบนหน้าจอ"
+      },
+      "target": {"posture": ["forward_head", "asymmetry"], "symptom": ["shoulder", "upper_back", "low_back"], "questionnaire": ["bag_over_10pct", "one_strap_bag"]},
+      "evidence_tier": "B",
+      "cite": [
+        {"label": "Perrone M et al., IJERPH 2018;15(11):2529 — 'nearly all studies' สนับสนุนเกณฑ์ ≤10% BW; ที่ 10% BW มุมศีรษะ-คอเปลี่ยน", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6267109/"}
+      ]
+    },
+
+    {
+      "id": "SLP-01",
+      "category": "SLP",
+      "subtype": "duration",
+      "title_th": "นอน 8-10 ชั่วโมง/คืน และเข้านอน-ตื่นเวลาใกล้เคียงกันทุกวัน",
+      "dose_th": "8-10 ชม./คืน (อายุ 13-18 ปี) รวมวันหยุดด้วย",
+      "reason_th": "ช่วงหลับลึกคือช่วงที่ร่างกายหลั่ง growth hormone มาซ่อมกล้ามเนื้อที่ล้าจากการนั่งเรียนทั้งวัน — นอนไม่พอทำให้ฮอร์โมนความเครียดสูงขึ้นและร่างกายเข้าสู่โหมด 'สลายโปรตีนมากกว่าสร้าง' และสมองยังปรับให้ 'เจ็บง่ายขึ้นจากสิ่งเร้าเท่าเดิม' (pain sensitization)",
+      "ui_text_th": "😴 นอน 8-10 ชั่วโมง เวลาเดิมทุกวัน — ตอนหลับลึกคือตอนที่ร่างกายส่ง 'ช่างซ่อม' มาซ่อมกล้ามเนื้อบ่าที่ล้าจากการนั่งเรียนทั้งวัน นอนน้อย = ช่างมาไม่ครบ แถมสมองยังปรับให้คุณเจ็บง่ายขึ้นจากสิ่งเร้าเท่าเดิม",
+      "target": {"posture": [], "symptom": ["neck", "shoulder", "low_back"], "questionnaire": ["sleep_under_8h", "poor_sleep_quality"]},
+      "evidence_tier": "A",
+      "cite": [
+        {"label": "AASM Pediatric Consensus 2016 (รับรองโดย AAP): 13-18 ปี = 8-10 ชม./24 ชม.", "url": "https://aasm.org/advocacy/position-statements/teen-sleep-duration-health-advisory/"},
+        {"label": "Auvinen et al., Eur Spine J 2010 (Northern Finland Birth Cohort, 16→18 ปี, n=1,773): วัยรุ่นที่มีปัญหาการนอน (ปริมาณหรือคุณภาพ) สัมพันธ์กับปวดคอในอีก 2 ปี — หญิง OR 4.39 [2.15-8.96], ชาย OR 2.17 [1.15-4.09]", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2899838/"},
+        {"label": "Correia et al. 2025 (ผู้ใหญ่): คุณภาพการนอนต่ำ OR 1.76 [1.17-2.63] — สูงกว่าผลของมุมก้มคอที่ไม่มีนัยสำคัญเลย", "url": "https://pubmed.ncbi.nlm.nih.gov/40845624/"}
+      ],
+      "honesty_note_th": "⚠️ ห้ามเขียนว่า 'WHO แนะนำนอน 8-10 ชม.' — WHO ไม่มีไกด์ไลน์การนอนสำหรับ 5-17 ปี ต้องอ้าง AASM/CDC/CSEP เท่านั้น | ⚠️ Auvinen นิยาม exposure เป็น composite ('นอน ≤6 ชม. หรือ ฝันร้าย/อ่อนเพลีย/ปัญหาการนอนบ่อย') ห้ามเขียนว่า 'นอน ≤6 ชม. อย่างเดียว = 4.4 เท่า'"
+    },
+    {
+      "id": "SLP-02",
+      "category": "SLP",
+      "subtype": "hygiene",
+      "title_th": "ตัดจอ 60 นาทีก่อนนอน + วางมือถือนอกระยะเอื้อมจากเตียง",
+      "dose_th": "หยุดใช้จออย่างน้อย 60 นาทีก่อนนอน | ชาร์จมือถือ 'นอกห้องนอน' หรืออย่างน้อยฝั่งตรงข้ามห้อง",
+      "reason_th": "Meta-analysis ในวัยรุ่น (n=125,198 อายุเฉลี่ย 14.5 ปี) พบว่าการใช้จอช่วงเข้านอนสัมพันธ์กับการนอนไม่พอ (OR 2.17) และที่น่าตกใจคือ แค่ 'มีเครื่องอยู่ในห้อง โดยไม่ได้ใช้' ก็ยังสัมพันธ์กับการนอนไม่พอ (OR 1.79) — เพราะฉะนั้นการเอามันออกจากห้องได้ผลกว่าการ 'ตั้งใจไม่เล่น'",
+      "ui_text_th": "📵 วางมือถือไว้นอกเอื้อมก่อนนอน — งานวิจัยพบว่าแค่ 'มีเครื่องอยู่ในห้อง โดยไม่ได้ใช้' ก็ยังสัมพันธ์กับการนอนไม่พอแล้ว การเอามันออกไปได้ผลกว่าการฝืนใจไม่เล่น",
+      "target": {"posture": [], "symptom": [], "questionnaire": ["sleep_under_8h", "phone_in_bedroom", "screen_before_bed"]},
+      "evidence_tier": "B",
+      "cite": [
+        {"label": "Carter B et al., JAMA Pediatrics 2016 (meta-analysis, n=125,198)", "url": "https://jamanetwork.com/journals/jamapediatrics/fullarticle/2571467"}
+      ]
+    },
+    {
+      "id": "SLP-03",
+      "category": "SLP",
+      "subtype": "position",
+      "title_th": "ท่านอน: หงายหรือตะแคง เลี่ยงนอนคว่ำ + ให้คอ 'ขนานกับที่นอน'",
+      "dose_th": "นอนหงาย = หมอนบางลง มีส่วนหนุนโค้งคอ | นอนตะแคง = หมอนต้องหนุนใต้คอสูงกว่าใต้ศีรษะ | เลี่ยงหมอนสูง/แข็งเกินไป",
+      "reason_th": "นอนคว่ำ = บิดคอค้างไว้ 6-8 ชั่วโมง และหมอนที่สูง/แข็งเกินไปทำให้คอ 'ก้มค้าง' ทั้งคืน ตื่นมาปวดและตึง — เป้าหมายคือให้คออยู่แนวเดียวกับกระดูกสันหลัง (neutral alignment)",
+      "ui_text_th": "🛌 นอนหงายหรือตะแคง อย่านอนคว่ำ (= บิดคอค้าง 7 ชั่วโมง) — ไม่ต้องซื้อหมอนแพง แค่ปรับความสูงหมอนให้คอขนานกับที่นอน ใช้ผ้าเช็ดตัวม้วนหนุนใต้คอก็ได้",
+      "target": {"posture": [], "symptom": ["neck", "shoulder"], "questionnaire": ["morning_neck_stiffness", "prone_sleeper"]},
+      "evidence_tier": "D",
+      "cite": [
+        {"label": "Harvard Health — Say good night to neck pain", "url": "https://www.health.harvard.edu/pain/say-good-night-to-neck-pain"},
+        {"label": "Cleveland Clinic — neutral head-neck alignment", "url": "https://health.clevelandclinic.org/best-sleeping-positions-for-pain"},
+        {"label": "Kovacs et al., The Lancet 2003 (RCT, n=313): ที่นอน medium-firm ดีกว่า firm — ⚠️ ทำในผู้ใหญ่", "url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(03)14792-7/abstract"}
+      ],
+      "honesty_note_th": "หลักฐานหมอน/ที่นอนเฉพาะวัยรุ่นยังบาง (RCT ส่วนใหญ่ทำในผู้ใหญ่) — ต้องเขียนเป็นหลักการ neutral alignment ห้ามแนะนำให้ซื้อหมอน/ที่นอนรุ่นใด และห้ามทำให้ครอบครัวรายได้น้อยรู้สึกกดดันว่าต้องซื้อของ"
+    },
+
+    {
+      "id": "STR-01",
+      "category": "STR",
+      "subtype": "breathing",
+      "title_th": "หายใจช้าด้วยกะบังลม 5 นาที/วัน",
+      "dose_th": "5 นาที/วัน ต่อเนื่องอย่างน้อย 5 สัปดาห์ (เช่น ก่อนสอบ / ก่อนนอน)",
+      "how_th": "มือวางบนท้อง หายใจเข้าทางจมูกให้ท้องดันมือขึ้น (นับ 4) หายใจออกช้ากว่าเข้า (นับ 6)",
+      "reason_th": "ความเครียดทำให้ระบบประสาทซิมพาเทติกสั่งกล้ามเนื้อบ่า (upper trapezius) เกร็งค้างโดยแทบไม่มีช่วงพักเลย — อันนี้ไม่ใช่ 'คิดไปเอง' มันวัดได้จริงด้วย EMG การหายใจช้าช่วยดึงร่างกายกลับเข้าโหมดผ่อนคลาย",
+      "ui_text_th": "🫁 หายใจช้า 5 นาที ก่อนนอน/ก่อนสอบ — เวลาเครียด กล้ามเนื้อบ่าคุณเกร็งค้างจริง ๆ (นักวิจัยวัดได้ด้วย EMG) นี่ไม่ใช่เรื่องในหัว มันเกิดขึ้นในกล้ามเนื้อจริง ๆ",
+      "target": {"posture": [], "symptom": ["neck", "shoulder", "headache"], "questionnaire": ["stress_high"]},
+      "evidence_tier": "C",
+      "cite": [
+        {"label": "Cluster-RCT feasibility ในนักเรียน ม.ปลาย: หายใจช้า 5 นาที/วัน × 5 สัปดาห์ ลด state anxiety", "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9397716/"},
+        {"label": "ความเครียดทางจิตใจ → EMG ของ trapezius สูงขึ้นอย่างมีนัยสำคัญ", "url": "https://link.springer.com/article/10.1207/s15327558ijbm0104_5"},
+        {"label": "Østerås et al., BMC Public Health 2015 (นักเรียนนอร์เวย์ 16-17 ปี, n=423): ในกลุ่มเครียดสูง 79.6% มีอาการปวด; ความเครียดสัมพันธ์กับการรายงานอาการปวด OR 1.68", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4619092/"}
+      ]
+    },
+    {
+      "id": "STR-02",
+      "category": "STR",
+      "subtype": "relaxation",
+      "title_th": "คลายกล้ามเนื้อแบบต่อเนื่อง (PMR) เน้นบ่า-คอ",
+      "dose_th": "5-10 นาที ก่อนนอน, 3-5 วัน/สัปดาห์",
+      "how_th": "เกร็งกล้ามเนื้อกลุ่มหนึ่ง 5 วินาที แล้วปล่อยทันที 15 วินาที — ไล่จากบ่า → คอ → มือ → ขา สังเกตความต่างระหว่าง 'เกร็ง' กับ 'ปล่อย'",
+      "reason_th": "ปัญหาของกล้ามเนื้อบ่าตอนเครียดคือมัน 'ลืมวิธีปล่อย' (EMG gaps หายไป) PMR คือการฝึกให้ร่างกายจำความรู้สึกของการปล่อยได้อีกครั้ง",
+      "ui_text_th": "🧘 เกร็ง-ปล่อย ไล่ทีละส่วน 5-10 นาทีก่อนนอน — เวลาเครียด บ่าคุณ 'ลืมวิธีปล่อย' นี่คือการฝึกให้มันจำได้ใหม่",
+      "target": {"posture": [], "symptom": ["neck", "shoulder"], "questionnaire": ["stress_high", "poor_sleep_quality"]},
+      "evidence_tier": "C",
+      "cite": [
+        {"label": "Diaphragmatic breathing + PMR ในโรงเรียน (pilot RCT, 12 สัปดาห์): ลดความเครียดทุก subscale", "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8494420/"},
+        {"label": "EMG gaps หายไปเมื่อเครียด → trapezius myalgia", "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2701407/"}
+      ]
+    },
+    {
+      "id": "STR-03",
+      "category": "STR",
+      "subtype": "dual_benefit",
+      "title_th": "ขยับร่างกาย = ยาสองเด้ง (ลดเครียด + นอนดีขึ้น)",
+      "dose_th": "ใช้โดสเดียวกับ EX-01 (เฉลี่ย 60 นาที/วัน) — ไม่ต้องเพิ่มอะไรใหม่",
+      "reason_th": "meta-analysis ของ RCT พบว่าการออกกำลังกาย 3-12 สัปดาห์ ลดความวิตกกังวล/ซึมเศร้า/ความเครียดระดับปานกลาง และเพิ่มคุณภาพการนอนในเด็ก-วัยรุ่น — ซึ่งทั้งสองอย่างนี้เป็นปัจจัยที่หลักฐานตามยาวชี้ว่าสัมพันธ์กับอาการปวดคอ-ไหล่มากกว่าท่าทางเสียอีก",
+      "ui_text_th": "🎁 การขยับที่คุณทำอยู่แล้ว ได้ 2 ต่อ — ลดเครียด + นอนหลับดีขึ้น ซึ่งสองอย่างนี้คือปัจจัยที่งานวิจัยบอกว่าเกี่ยวกับอาการปวดมากกว่า 'องศาคอ' เสียอีก",
+      "target": {"posture": [], "symptom": [], "questionnaire": ["stress_high", "sleep_under_8h"]},
+      "evidence_tier": "B",
+      "requires_pairing_with": ["EX-01"],
+      "cite": [
+        {"label": "Young-HUNT (J Adolesc Health 2014): physical activity = ปัจจัยป้องกันปวดคอ-ไหล่ในวัยรุ่น", "url": "https://pubmed.ncbi.nlm.nih.gov/24746679/"},
+        {"label": "meta-analysis: การออกกำลังกาย 3-12 สัปดาห์ เพิ่มคุณภาพการนอนในเด็ก-วัยรุ่น", "url": "https://link.springer.com/article/10.1007/s00787-025-02892-6"}
+      ]
+    },
+
+    {
+      "id": "NUT-01",
+      "category": "NUT",
+      "subtype": "universal",
+      "universal": true,
+      "title_th": "กินให้ครบ 3 มื้อ ไม่ข้ามมื้อ (โดยเฉพาะมื้อเช้า) และกินข้าวพร้อมครอบครัวให้บ่อยขึ้น",
+      "dose_th": "3 มื้อ/วัน + มื้อเช้าทุกวัน + กินข้าวพร้อมครอบครัวให้บ่อยที่สุดเท่าที่ทำได้",
+      "reason_th": "ร่างกายซ่อมกล้ามเนื้อคอ-บ่าที่ล้าจากการนั่งเรียนทั้งวันได้ก็ต่อเมื่อมี 'วัตถุดิบ' พอ — และช่วงวัยรุ่นคือช่วงที่ร่างกายสร้าง 40-60% ของมวลกระดูกทั้งชีวิต หน้าต่างนี้ปิดแล้วปิดเลยหลังอายุประมาณ 20",
+      "ui_text_th": "🍚 กินให้ครบ 3 มื้อ อย่าข้ามมื้อเช้า — ร่างกายซ่อมกล้ามเนื้อที่ล้าจากการนั่งเรียนทั้งวันได้ก็ต่อเมื่อมีของให้ซ่อม\n(ระบบนี้ไม่แนะนำให้ใครลดอาหาร ลดน้ำหนัก หรืองดอะไรทั้งสิ้น — เราพูดเรื่อง 'เติม' ไม่ใช่ 'ตัด')",
+      "target": {"posture": [], "symptom": [], "questionnaire": ["skips_breakfast"]},
+      "evidence_tier": "B",
+      "suppress_if": ["FLAG-RED-EATING"],
+      "cite": [
+        {"label": "AAP 2016, Pediatrics 138(3):e20161649 — การกินข้าวพร้อมครอบครัวเป็น 1 ใน 2 ปัจจัยป้องกันร่วมของทั้งโรคอ้วนและโรคการกินผิดปกติ", "url": "https://publications.aap.org/pediatrics/article/138/3/e20161649/52684/Preventing-Obesity-and-Eating-Disorders-in"},
+        {"label": "Peak bone mass — 40-60% สะสมในช่วงวัยรุ่น", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12088333/"}
+      ]
+    },
+    {
+      "id": "NUT-02",
+      "category": "NUT",
+      "subtype": "universal",
+      "universal": true,
+      "title_th": "ให้ทุกมื้อมีของโปรตีน และมีแหล่งแคลเซียมทุกวัน",
+      "dose_th": "โปรตีน: ให้มี 'อย่างน้อย 1 อย่าง' ในทุกมื้อ (ไข่ / นม / เต้าหู้ / ถั่ว / เนื้อสัตว์/ปลา) | แคลเซียม: ให้มีทุกวัน (นม / ปลาเล็กปลาน้อยกินก้าง / ปลากระป๋อง / นมถั่วเหลืองเสริมแคลเซียม / ผักใบเขียวเข้ม เช่น คะน้า ใบยอ)",
+      "reason_th": "โปรตีนคือวัตถุดิบของกล้ามเนื้อที่พยุงคอ-หลัง (กล้ามเนื้อที่ไม่มีวัตถุดิบพอ ฝึกเท่าไหร่ก็ไม่แข็งแรงขึ้น) และแคลเซียมคือวัตถุดิบของกระดูก — วัยรุ่นต้องการมากกว่าผู้ใหญ่ แต่มีนักเรียนไทยเพียงราว 30% ที่ได้แคลเซียมถึงเกณฑ์",
+      "ui_text_th": "🥚 ทุกมื้อมีของโปรตีนสักอย่าง + มีของที่มีแคลเซียมทุกวัน (นม / ปลาเล็กปลาน้อยกินก้าง / คะน้า)\nไม่ต้องนับกรัม ไม่ต้องชั่ง ไม่ต้องจดแคลอรี — แค่ 'มี' ก็พอ",
+      "target": {"posture": [], "symptom": [], "questionnaire": []},
+      "evidence_tier": "B",
+      "suppress_if": ["FLAG-RED-EATING"],
+      "hard_rules": [
+        "ห้ามแสดงตัวเลข 'มิลลิกรัมแคลเซียม/วัน' จนกว่าทีมจะเปิด DRI2563.pdf ตัวจริงและอ่านจากตาราง (แหล่งทุติยภูมิขัดกัน: 1,000 vs 1,100 vs 1,300 มก.)",
+        "ห้ามให้เด็กนับกรัมโปรตีน/ชั่งอาหาร/จดแคลอรี — food & macro tracking สัมพันธ์กับ disordered eating ในวัยรุ่น",
+        "ห้ามแนะนำอาหารเสริม/วิตามินเม็ด/แคลเซียมเม็ด — เป็นคำแนะนำทางการแพทย์ที่ต้องมาจากแพทย์/เภสัชกร"
+      ],
+      "cite": [
+        {"label": "DRI ไทย พ.ศ. 2563 — สำนักโภชนาการ กรมอนามัย (ต้องเปิด PDF ยืนยันตัวเลขเองก่อนใช้)", "url": "https://nutrition2.anamai.moph.go.th/th/dri/176096"},
+        {"label": "ช่องว่างแคลเซียมในเด็กไทย: มีเพียง ~30% ที่ได้ถึงเกณฑ์", "url": "https://www.nutraingredients.com/Article/2021/10/18/Thai-calcium-concern-Adolescents-have-poor-knowledge-of-mineral-sources-and-nutrition-labels-Study/"},
+        {"label": "Protein DRI 14-18 ปี = 0.85 ก./กก./วัน (ใช้ในฝั่งวิชาการ/สไลด์ได้ ห้าม surface เป็นเป้าให้เด็กนับ)", "url": "https://www.ncbi.nlm.nih.gov/books/NBK214999/"}
+      ]
+    },
+    {
+      "id": "NUT-03",
+      "category": "NUT",
+      "subtype": "universal",
+      "universal": true,
+      "title_th": "มีกิจกรรมกลางแจ้งบ้างในช่วงเช้าหรือเย็น",
+      "dose_th": "สัปดาห์ละ 3-5 ครั้ง ช่วงเช้าหรือเย็น (เลี่ยงแดดจัดกลางวัน)",
+      "reason_th": "วิตามินดีคือ 'กุญแจ' ที่เปิดให้ลำไส้ดูดซึมแคลเซียมได้ — กินแคลเซียมเท่าไหร่ก็ไม่ขึ้นกระดูกถ้าขาดวิตามินดี และการขาดวิตามินดีถูกระบุเป็นปัจจัยร่วมของอาการปวดหลังในเด็กและวัยรุ่น ข้อดีคือกิจกรรมกลางแจ้งได้ทั้งวิตามินดีและนับเป็นเวลาขยับ 60 นาทีไปในตัว",
+      "ui_text_th": "🌤️ ออกไปข้างนอกช่วงเช้าหรือเย็นบ้าง สัปดาห์ละ 3-5 ครั้ง — ได้ทั้งวิตามินดี (ตัวที่เปิดให้กระดูกดูดซึมแคลเซียมได้) และนับเป็นเวลาขยับไปในตัว\n(ไม่ต้องไปตากแดดเที่ยง — บ้านเราแดดแรงเกินไป)",
+      "target": {"posture": [], "symptom": [], "questionnaire": ["mvpa_below_target"]},
+      "evidence_tier": "C",
+      "suppress_if": ["FLAG-RED-EATING"],
+      "hard_rules": [
+        "ห้ามสั่งให้ 'ตากแดด 15-20 นาที' แบบไม่ระบุช่วงเวลา — UV index ประเทศไทยสูงมาก",
+        "ห้ามแนะนำวิตามินดีเม็ด/อาหารเสริม"
+      ],
+      "cite": [
+        {"label": "Ambrosio et al. 2023 — การขาดวิตามินดีเป็นปัจจัยร่วมของปวดหลังในเด็ก/วัยรุ่น", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10492481/"}
+      ]
+    }
+  ],
+
+  "evidence_tiers": {
+    "A": "ไกด์ไลน์ระดับสากล / systematic review คุณภาพสูง ที่ทำในกลุ่มอายุตรงกับผู้ใช้",
+    "B": "RCT หรือ cohort ตามยาว ที่ทำในเด็ก/วัยรุ่นโดยตรง",
+    "C": "หลักฐาน cross-sectional ในเด็ก/วัยรุ่น หรือ RCT ที่ทำในผู้ใหญ่/วัยผู้ใหญ่ตอนต้น",
+    "D": "ความเห็นผู้เชี่ยวชาญ / หลักการทางชีวกลศาสตร์ / หลักฐานอ่อนหรือมีข้อโต้แย้ง (ต้องแสดง honesty_note คู่เสมอ)"
+  }
+}

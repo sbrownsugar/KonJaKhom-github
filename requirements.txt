@@ -1,0 +1,13 @@
+# ก่อนจะค่อม : กระจกอนาคต — แพ็กเกจที่ต้องใช้
+# ติดตั้ง:  pip install -r requirements.txt
+streamlit==1.59.2
+mediapipe==0.10.35
+opencv-python
+numpy==2.5.1
+scipy==1.18.0
+scikit-learn==1.9.0
+pandas==3.0.3
+matplotlib==3.11.0
+pillow==12.3.0
+Markdown==3.10.2
+python-docx==1.2.0
